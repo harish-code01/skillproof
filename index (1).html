@@ -1,0 +1,1087 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>SkillProof — From Skill to Opportunity</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap');
+:root{
+  --paper:#FAF9F5; --paper-alt:#F0EEE6; --ink:#15181C; --ink-soft:#4B5058; --line:#DEDACD;
+  --navy:#12233D; --amber:#F5A623; --amber-ink:#5A3A00; --teal:#0E9F87; --red:#C4483A;
+  --radius:16px; --radius-sm:10px;
+  --shadow:0 1px 2px rgba(20,20,10,.04), 0 8px 24px -12px rgba(20,20,10,.18);
+  --mono:'IBM Plex Mono',ui-monospace,'SF Mono',Menlo,monospace;
+  --disp:'Space Grotesk',ui-sans-serif,system-ui,sans-serif;
+  --body:'Inter',ui-sans-serif,system-ui,sans-serif;
+}
+*{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+html{overflow-x:hidden;}
+html,body{margin:0;padding:0;background:var(--paper);color:var(--ink);font-family:var(--body); overflow-x:hidden;}
+body{min-height:100vh; padding-bottom:76px;}
+h1,h2,h3{font-family:var(--disp); margin:0; letter-spacing:-.01em;}
+p{margin:0;}
+button{font-family:var(--body); cursor:pointer; background:none;}
+::selection{background:var(--amber); color:var(--ink);}
+:focus-visible{outline:2px solid var(--navy); outline-offset:2px;}
+img{max-width:100%;}
+.eyebrow{font-family:var(--mono); font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:var(--ink-soft);}
+.badge{display:inline-flex; align-items:center; gap:6px; font-family:var(--mono); font-size:11px; letter-spacing:.06em; text-transform:uppercase; padding:4px 10px; border-radius:99px; border:1px solid var(--line); background:var(--paper-alt);}
+.badge.verified{background:#E4F6F1; border-color:#BFE9DE; color:#0B6E5C;}
+/* ---- App shell ---- */
+.topbar{position:sticky; top:0; z-index:20; display:flex; align-items:center; justify-content:space-between; padding:14px 20px; background:rgba(250,249,245,.9); backdrop-filter:blur(8px); border-bottom:1px solid var(--line);}
+.logo{display:flex; align-items:center; gap:8px; font-family:var(--disp); font-weight:700; font-size:18px;}
+.logo .mark{width:26px; height:26px; border-radius:7px; background:var(--navy); display:flex; align-items:center; justify-content:center;}
+.logo .mark svg{width:15px; height:15px;}
+.topbar-actions{display:flex; align-items:center; gap:10px;}
+.icon-btn{width:36px;height:36px;border-radius:99px;border:1px solid var(--line);background:var(--paper);display:flex;align-items:center;justify-content:center;}
+.shell{display:flex; max-width:1200px; margin:0 auto;}
+.sidebar{display:none;}
+.main{flex:1; min-width:0; padding:24px 20px 40px;}
+@media(min-width:900px){
+  body{padding-bottom:0;}
+  .shell{padding-top:8px;}
+  .sidebar{display:flex; flex-direction:column; gap:2px; width:216px; flex-shrink:0; padding:24px 12px;}
+  .sidebar a{display:flex; align-items:center; gap:10px; padding:10px 12px; border-radius:var(--radius-sm); color:var(--ink-soft); font-size:14px; font-weight:600; text-decoration:none;}
+  .sidebar a.active{background:var(--navy); color:#fff;}
+  .main{padding:24px 32px 48px; max-width:820px;}
+}
+.bottomnav{position:fixed; bottom:0; left:0; right:0; z-index:20; display:flex; background:var(--paper); border-top:1px solid var(--line); padding:6px 4px calc(6px + env(safe-area-inset-bottom));}
+@media(min-width:900px){.bottomnav{display:none;}}
+.bottomnav a{flex:1; display:flex; flex-direction:column; align-items:center; gap:2px; padding:6px 2px; min-height:44px; justify-content:center; color:var(--ink-soft); text-decoration:none; font-size:10.5px; font-weight:600; border-radius:10px;}
+.bottomnav a.active{color:var(--navy);}
+.bottomnav svg{width:20px;height:20px;}
+.view{display:none; animation:rise .35s ease both;}
+.view.active{display:block;}
+@keyframes rise{from{opacity:0; transform:translateY(8px);} to{opacity:1; transform:none;}}
+/* ---- generic components ---- */
+.card{background:#fff; border:1px solid var(--line); border-radius:var(--radius); box-shadow:var(--shadow); padding:22px;}
+.field{margin-bottom:16px;}
+.field label{display:block; font-size:13px; font-weight:600; margin-bottom:8px;}
+textarea,input[type=text]{width:100%; border:1.5px solid var(--line); border-radius:var(--radius-sm); padding:14px; font-family:var(--body); font-size:15px; background:var(--paper); resize:vertical; color:var(--ink);}
+textarea:focus,input:focus{border-color:var(--navy); outline:none;}
+.btn{display:inline-flex; align-items:center; justify-content:center; gap:8px; min-height:48px; padding:0 22px; border-radius:99px; border:none; font-weight:700; font-size:14.5px; transition:.12s ease; cursor:pointer;}
+.btn:active{transform:scale(.97);}
+.btn-primary{background:var(--navy); color:#fff;}
+.btn-amber{background:var(--amber); color:var(--amber-ink);}
+.btn-ghost{background:transparent; border:1.5px solid var(--line); color:var(--ink);}
+.btn-block{width:100%;}
+.btn[disabled]{opacity:.45; pointer-events:none;}
+.chip{display:inline-flex; align-items:center; gap:6px; padding:10px 14px; min-height:36px; border-radius:99px; border:1.5px solid var(--line); font-size:13.5px; font-weight:600; background:#fff;}
+.chip.check{background:#E4F6F1; border-color:#BFE9DE; color:#0B6E5C;}
+.hero{padding:36px 4px 20px;}
+.hero h1{font-size:36px; line-height:1.05;}
+@media(min-width:640px){.hero h1{font-size:46px;}}
+.hero p.sub{margin-top:10px; color:var(--ink-soft); font-size:16px; max-width:46ch;}
+.mode-row{display:flex; flex-wrap:wrap; gap:10px; margin-top:18px;}
+.pill-alert{display:flex; gap:10px; align-items:flex-start; padding:12px 14px; border-radius:var(--radius-sm); font-size:13px; margin-top:14px;}
+.pill-alert.err{background:#FBEAE7; border:1px solid #F0C6BE; color:#8A2F22;}
+.pill-alert.warn{background:#FEF3DE; border:1px solid #F5D998; color:var(--amber-ink);}
+.pill-alert.ok{background:#E4F6F1; border:1px solid #BFE9DE; color:#0B6E5C;}
+.problem-solution{display:grid; gap:12px; margin-top:22px;}
+@media(min-width:640px){.problem-solution{grid-template-columns:1fr 1fr;}}
+.ps-card{border-radius:var(--radius-sm); padding:16px; border:1.5px solid var(--line); background:var(--paper-alt);}
+.ps-card.sol{background:#EFF6F4; border-color:#CFE8E1;}
+.progress-track{display:flex; flex-direction:column; gap:0; margin-top:8px;}
+.progress-step-wrap{position:relative;}
+.progress-step-wrap:not(:last-child)::after{content:'';position:absolute; left:14.5px; top:38px; bottom:-4px; width:1.5px; background:var(--line);}
+.progress-step{display:flex; gap:14px; padding:14px 0;}
+.progress-step .num{font-family:var(--mono); font-size:12px; width:30px; height:30px; border-radius:99px; border:1.5px solid var(--line); display:flex; align-items:center; justify-content:center; flex-shrink:0; background:#fff;}
+.progress-step.done .num{background:var(--teal); border-color:var(--teal); color:#fff;}
+.progress-step.active .num{background:var(--navy); border-color:var(--navy); color:#fff;}
+.bar-row{display:flex; align-items:center; gap:10px; margin-bottom:12px;}
+.bar-row .label{width:100px; font-size:13px; font-weight:600; flex-shrink:0;}
+.bar-track{flex:1; height:8px; border-radius:99px; background:var(--paper-alt); overflow:hidden;}
+.bar-fill{height:100%; border-radius:99px; background:var(--navy); width:0%; transition:width 1s ease;}
+.bar-pct{font-family:var(--mono); font-size:12.5px; width:36px; text-align:right;}
+.why-item{border-top:1px solid var(--line); padding:12px 0;}
+.why-item .t{font-size:13px; font-weight:700; margin-bottom:4px;}
+.why-item .d{font-size:13.5px; color:var(--ink-soft);}
+/* passport */
+.passport{position:relative; border-radius:20px; background:linear-gradient(155deg,var(--navy),#0A1728); color:#fff; padding:26px 24px; overflow:hidden; box-shadow:0 20px 40px -18px rgba(10,20,40,.5);}
+.passport::before{content:''; position:absolute; inset:0; background:radial-gradient(circle at 85% -10%, rgba(245,166,35,.28), transparent 55%);}
+.passport-top{display:flex; justify-content:space-between; align-items:flex-start; position:relative;}
+.passport .plabel{font-family:var(--mono); font-size:10.5px; letter-spacing:.16em; text-transform:uppercase; opacity:.7;}
+.passport h2{font-size:26px; margin-top:14px; position:relative;}
+.passport .role{font-size:14px; opacity:.8; margin-top:2px;}
+.passport-score{display:flex; align-items:baseline; gap:6px; margin-top:18px;}
+.passport-score .n{font-family:var(--disp); font-size:44px; font-weight:700;}
+.passport-score .d{opacity:.7; font-size:14px;}
+.passport-bars{margin-top:14px; display:flex; flex-direction:column; gap:8px;}
+.passport-bars .row{display:flex; align-items:center; gap:8px; font-size:11.5px;}
+.passport-bars .l{width:76px; opacity:.8;}
+.passport-bars .track{flex:1; height:5px; border-radius:99px; background:rgba(255,255,255,.16);}
+.passport-bars .fill{height:100%; border-radius:99px; background:var(--amber);}
+.passport-skills{display:flex; flex-wrap:wrap; gap:6px; margin-top:16px;}
+.passport-skills span{font-size:11.5px; background:rgba(255,255,255,.1); border:1px solid rgba(255,255,255,.18); padding:5px 10px; border-radius:99px;}
+.passport-foot{display:flex; justify-content:space-between; align-items:center; margin-top:20px; padding-top:16px; border-top:1px dashed rgba(255,255,255,.25); gap:12px; flex-wrap:wrap;}
+.proofid{font-family:var(--mono); font-size:13px; letter-spacing:.04em; word-break:break-all;}
+#qrbox{background:#fff; padding:6px; border-radius:10px; width:74px; height:74px; display:flex; align-items:center; justify-content:center; flex-shrink:0;}
+.rec-frame{position:relative; aspect-ratio:4/3; background:#0d1117; border-radius:var(--radius); overflow:hidden; border:1px solid var(--line);}
+.rec-frame video{width:100%;height:100%;object-fit:cover;}
+.rec-timer{position:absolute; top:12px; left:12px; font-family:var(--mono); background:rgba(0,0,0,.55); color:#fff; padding:4px 10px; border-radius:99px; font-size:12.5px; display:flex; align-items:center; gap:6px;}
+.rec-dot{width:8px;height:8px;border-radius:99px;background:var(--red); animation:pulse 1.1s infinite;}
+@keyframes pulse{50%{opacity:.3;}}
+.check-anim{display:flex; flex-direction:column; gap:10px;}
+.check-anim .row{display:flex; align-items:center; gap:10px; font-size:14px; opacity:.35; transition:.3s;}
+.check-anim .row.on{opacity:1;}
+.check-anim .row .dot{width:20px;height:20px;border-radius:99px; border:1.5px solid var(--line); display:flex; align-items:center; justify-content:center; flex-shrink:0; font-size:11px;}
+.check-anim .row.on .dot{background:var(--teal); border-color:var(--teal); color:#fff;}
+.match-card{display:flex; gap:14px; align-items:center;}
+.match-score{font-family:var(--mono); font-weight:700; font-size:15px; background:#E4F6F1; color:#0B6E5C; padding:6px 10px; border-radius:8px; flex-shrink:0;}
+.toast{position:fixed; left:50%; bottom:92px; transform:translateX(-50%); background:var(--ink); color:#fff; padding:12px 18px; border-radius:99px; font-size:13.5px; font-weight:600; z-index:60; box-shadow:var(--shadow); opacity:0; pointer-events:none; transition:.25s;}
+.toast.show{opacity:1; bottom:100px;}
+@media(min-width:900px){.toast{bottom:24px;} .toast.show{bottom:32px;}}
+.section-title{display:flex; align-items:center; justify-content:space-between; gap:8px; margin:28px 0 12px;}
+.grid2{display:grid; gap:14px;}
+@media(min-width:640px){.grid2{grid-template-columns:1fr 1fr;}}
+.muted{color:var(--ink-soft);}
+.empty{text-align:center; padding:40px 16px; color:var(--ink-soft);}
+.footnote{font-size:12px; color:var(--ink-soft); margin-top:18px; line-height:1.5;}
+a.link{color:var(--navy); font-weight:600;}
+.how-strip{display:flex; flex-wrap:wrap; gap:10px; margin-top:14px;}
+.how-step{flex:1 1 160px; border:1.5px solid var(--line); border-radius:var(--radius-sm); padding:12px 14px; background:#fff;}
+.how-step .n{font-family:var(--mono); font-size:11px; color:var(--teal); font-weight:700;}
+.how-step .t{font-size:13.5px; font-weight:700; margin-top:4px;}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <a class="logo" href="#/" style="text-decoration:none; color:var(--ink);" aria-label="SkillProof home"><div class="mark"><svg viewBox="0 0 24 24" fill="none"><path d="M4 12.5 10 18 20 6" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg></div>SkillProof</a>
+  <div class="topbar-actions">
+    <span class="badge" id="roleBadge">WORKER</span>
+    <button class="icon-btn" id="resetBtn" title="Reset demo data" aria-label="Reset demo data">
+      <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#15181C" stroke-width="2" stroke-linecap="round"><path d="M3 12a9 9 0 1 0 3-6.7M3 4v5h5"/></svg>
+    </button>
+  </div>
+</div>
+<div class="shell">
+  <nav class="sidebar" id="sidebar"></nav>
+  <main class="main" id="main">
+
+<!-- LANDING -->
+<section class="view" id="view-landing">
+  <div class="hero">
+    <p class="eyebrow">Skill → Proof → Opportunity</p>
+    <h1>What can you do?</h1>
+    <p class="sub">Tell us what you're good at. We'll help you turn it into evidence, a verified Skill Passport, and real opportunities.</p>
+  </div>
+  <div class="card">
+    <div class="field"><label for="nameInput">Your name</label><input type="text" id="nameInput" placeholder="Your full name"></div>
+    <div class="field"><label for="skillInput">What skills do you have?</label><textarea id="skillInput" rows="3" placeholder="I can repair electrical wiring, install switches and troubleshoot basic electrical problems."></textarea></div>
+    <div class="field"><label for="goalInput">What are you looking for?</label><input type="text" id="goalInput" placeholder="I want electrician work near Coimbatore."></div>
+    <div id="landingError"></div>
+    <button class="btn btn-primary btn-block" id="buildPathBtn">Build my skill path →</button>
+  </div>
+  <div class="mode-row">
+    <button class="btn btn-ghost" id="toEmployerBtn">I need a skilled person</button>
+    <button class="btn btn-ghost" id="toVerifyPromptBtn">Verify a skill</button>
+  </div>
+  <div class="problem-solution">
+    <div class="ps-card"><p class="eyebrow">Problem</p><p style="margin-top:6px; font-size:14px;">Skilled workers often struggle to prove what they can actually do.</p></div>
+    <div class="ps-card sol"><p class="eyebrow">Solution</p><p style="margin-top:6px; font-size:14px;">SkillProof converts practical skills into evidence, an AI-assisted Skill Passport, and opportunity matches.</p></div>
+  </div>
+  <div class="how-strip">
+    <div class="how-step"><div class="n">01</div><div class="t">Show your skill on video</div></div>
+    <div class="how-step"><div class="n">02</div><div class="t">Get an AI-assisted Skill Score</div></div>
+    <div class="how-step"><div class="n">03</div><div class="t">Share a verified Skill Passport</div></div>
+  </div>
+  <p class="footnote">This build stores your submissions and progress in on-device storage, so the flow survives a page refresh and QR verification works end-to-end in this browser. It's a hackathon prototype — connect a real backend (e.g. Firebase) to sync records across devices.</p>
+</section>
+
+<!-- UNDERSTANDING -->
+<section class="view" id="view-understand">
+  <p class="eyebrow">We understand</p>
+  <h2 style="font-size:26px; margin-top:6px;">Here's what we picked up</h2>
+  <div class="card" style="margin-top:16px;">
+    <p class="eyebrow">Your skills</p>
+    <h3 id="uCategory" style="font-size:20px; margin-top:6px;"></h3>
+    <div id="uSubskills" style="display:flex; flex-wrap:wrap; gap:8px; margin-top:12px;"></div>
+    <p class="muted" style="margin-top:12px; font-size:13.5px;">Suggested level: <b id="uLevel"></b></p>
+  </div>
+  <div class="card" style="margin-top:14px;">
+    <p class="eyebrow">You want</p>
+    <h3 id="uGoal" style="font-size:18px; margin-top:6px;"></h3>
+    <p class="muted" id="uLocation" style="margin-top:6px; font-size:13.5px;"></p>
+  </div>
+  <div class="section-title"><h3 style="font-size:16px;">Your recommended path</h3></div>
+  <div class="progress-track" id="pathTrack"></div>
+  <button class="btn btn-primary btn-block" style="margin-top:18px;" id="startMissionBtn">Start verification mission →</button>
+</section>
+
+<!-- MISSION -->
+<section class="view" id="view-mission">
+  <p class="eyebrow">Verification mission</p>
+  <h2 style="font-size:24px; margin-top:6px;" id="missionTitle"></h2>
+  <div class="card" style="margin-top:16px;">
+    <p class="eyebrow">Objective</p>
+    <p style="margin-top:8px; font-size:14.5px;" id="missionObjective"></p>
+    <p class="eyebrow" style="margin-top:16px;">Evidence required</p>
+    <p style="margin-top:8px; font-size:14.5px;" id="missionEvidence"></p>
+    <p class="eyebrow" style="margin-top:16px;">Completion criteria</p>
+    <p style="margin-top:8px; font-size:14.5px;" id="missionCriteria"></p>
+  </div>
+  <button class="btn btn-primary btn-block" style="margin-top:18px;" id="startEvidenceBtn">Continue to evidence →</button>
+</section>
+
+<!-- EVIDENCE -->
+<section class="view" id="view-evidence">
+  <p class="eyebrow">Step 1 of 2</p>
+  <h2 style="font-size:24px; margin-top:6px;">Record or upload your evidence</h2>
+  <div class="rec-frame" style="margin-top:16px;">
+    <video id="camPreview" autoplay muted playsinline></video>
+    <div class="rec-timer" id="recTimer" style="display:none;"><span class="rec-dot"></span><span id="recTimerText">00:00</span></div>
+  </div>
+  <div id="evidenceAlerts"></div>
+  <div class="mode-row" style="margin-top:14px;">
+    <button class="btn btn-amber" id="startCamBtn">Enable camera</button>
+    <button class="btn btn-ghost" id="recordBtn" disabled>Start recording</button>
+    <label class="btn btn-ghost" for="uploadInput">Upload video instead</label>
+    <input type="file" id="uploadInput" accept="video/*" style="display:none;">
+  </div>
+  <p class="muted" style="margin-top:10px; font-size:13px;" id="evidenceFileLabel"></p>
+  <button class="btn btn-primary btn-block" style="margin-top:18px;" id="submitEvidenceBtn" disabled>Submit evidence →</button>
+</section>
+
+<!-- EVALUATION -->
+<section class="view" id="view-evaluation">
+  <p class="eyebrow">AI-assisted evaluation prototype</p>
+  <h2 style="font-size:24px; margin-top:6px;">Evaluating your evidence…</h2>
+  <p class="muted" style="margin-top:8px; font-size:13.5px;">Prototype scoring pipeline — a production version can connect to a computer-vision model for frame-by-frame analysis.</p>
+  <div class="card" style="margin-top:18px;">
+    <div class="check-anim" id="checkAnim">
+      <div class="row" data-i="0"><div class="dot">1</div><span>Checking evidence format</span></div>
+      <div class="row" data-i="1"><div class="dot">2</div><span>Analysing technique cues</span></div>
+      <div class="row" data-i="2"><div class="dot">3</div><span>Comparing against mission criteria</span></div>
+      <div class="row" data-i="3"><div class="dot">4</div><span>Scoring confidence &amp; completeness</span></div>
+      <div class="row" data-i="4"><div class="dot">5</div><span>Generating Skill Passport</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- SCORE -->
+<section class="view" id="view-score">
+  <p class="eyebrow">Result</p>
+  <h2 style="font-size:26px; margin-top:6px;">Your Skill Score</h2>
+  <div class="card" style="margin-top:16px; text-align:center;">
+    <div style="font-family:var(--disp); font-size:56px; font-weight:700;" id="scoreBig">--</div>
+    <p class="muted">out of 100</p>
+  </div>
+  <div class="card" style="margin-top:14px;">
+    <p class="eyebrow" style="margin-bottom:12px;">Score breakdown</p>
+    <div id="scoreBars"></div>
+  </div>
+  <div class="card" style="margin-top:14px;">
+    <p class="eyebrow" style="margin-bottom:6px;">Why this score</p>
+    <div id="whyList"></div>
+  </div>
+  <button class="btn btn-primary btn-block" style="margin-top:18px;" id="toPassportBtn">View my Skill Passport →</button>
+</section>
+
+<!-- PASSPORT -->
+<section class="view" id="view-passport">
+  <p class="eyebrow">Skill Passport</p>
+  <div class="passport" style="margin-top:12px;">
+    <div class="passport-top">
+      <div><p class="plabel">Verified Skill Passport</p><h2 id="pName"></h2><p class="role" id="pCategory"></p></div>
+      <span class="badge verified" style="background:rgba(255,255,255,.14); border-color:rgba(255,255,255,.3); color:#fff;">✓ Verified</span>
+    </div>
+    <div class="passport-score"><span class="n" id="pScore"></span><span class="d">/ 100 skill score</span></div>
+    <div class="passport-bars" id="pBars"></div>
+    <div class="passport-skills" id="pSkills"></div>
+    <div class="passport-foot">
+      <div><p class="plabel">Proof ID</p><p class="proofid" id="pProofId"></p></div>
+      <div id="qrbox"></div>
+    </div>
+  </div>
+  <div class="mode-row" style="margin-top:16px;">
+    <button class="btn btn-ghost" id="downloadPassportBtn">Download passport image</button>
+    <button class="btn btn-ghost" id="copyLinkBtn">Copy verification link</button>
+  </div>
+  <div id="passportAlerts"></div>
+  <button class="btn btn-primary btn-block" style="margin-top:18px;" id="toOpportunitiesBtn">See matching opportunities →</button>
+</section>
+
+<!-- OPPORTUNITIES -->
+<section class="view" id="view-opportunities">
+  <p class="eyebrow">Matches for you</p>
+  <h2 style="font-size:24px; margin-top:6px;">Opportunities</h2>
+  <div id="oppList" style="margin-top:16px; display:flex; flex-direction:column; gap:12px;"></div>
+</section>
+
+<!-- EMPLOYER LANDING -->
+<section class="view" id="view-employer">
+  <div class="hero" style="padding-top:10px;">
+    <p class="eyebrow">For employers</p>
+    <h1 style="font-size:30px;">Find a verified skilled person</h1>
+    <p class="sub">Describe the skill you need. We'll match you with workers who have proof, not just claims.</p>
+  </div>
+  <div class="card">
+    <div class="field"><label for="empSkillInput">Skill you need</label><textarea id="empSkillInput" rows="2" placeholder="Need someone who can install and repair home electrical wiring."></textarea></div>
+    <div class="field"><label for="empLocationInput">Location (optional)</label><input type="text" id="empLocationInput" placeholder="Coimbatore"></div>
+    <div id="empError"></div>
+    <button class="btn btn-primary btn-block" id="empSearchBtn">Search verified workers →</button>
+  </div>
+  <button class="btn btn-ghost" style="margin-top:14px;" id="backToWorkerBtn">← Back to worker flow</button>
+</section>
+
+<!-- EMPLOYER RESULTS -->
+<section class="view" id="view-employer-results">
+  <p class="eyebrow">Matching workers</p>
+  <h2 style="font-size:24px; margin-top:6px;" id="empResultsTitle">Results</h2>
+  <div id="empResultsList" style="margin-top:16px; display:flex; flex-direction:column; gap:12px;"></div>
+</section>
+
+<!-- VERIFY PROMPT -->
+<section class="view" id="view-verify-prompt">
+  <p class="eyebrow">Verify a skill</p>
+  <h2 style="font-size:24px; margin-top:6px;">Enter a Proof ID</h2>
+  <div class="card" style="margin-top:16px;">
+    <div class="field"><label for="verifyInput">Proof ID</label><input type="text" id="verifyInput" placeholder="SP-XXXXXX-XXXX"></div>
+    <button class="btn btn-primary btn-block" id="verifyGoBtn">Verify →</button>
+  </div>
+</section>
+
+<!-- VERIFY RESULT -->
+<section class="view" id="view-verify">
+  <p class="eyebrow">Public verification</p>
+  <div id="verifyContent" style="margin-top:14px;"></div>
+</section>
+
+<!-- PROFILE -->
+<section class="view" id="view-profile">
+  <p class="eyebrow">Profile</p>
+  <h2 style="font-size:24px; margin-top:6px;">Your account</h2>
+  <div class="card" style="margin-top:16px;" id="profileCard"></div>
+  <div class="card" style="margin-top:14px;">
+    <p class="eyebrow" style="margin-bottom:10px;">Contact requests received</p>
+    <div id="profileRequests"></div>
+  </div>
+</section>
+
+  </main>
+</div>
+
+<nav class="bottomnav" id="bottomnav"></nav>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+(function(){
+"use strict";
+
+/* ---------------- utilities ---------------- */
+function escapeHTML(str){
+  return String(str==null?"":str).replace(/[&<>"']/g, function(c){
+    return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];
+  });
+}
+function $(sel,root){ return (root||document).querySelector(sel); }
+function $all(sel,root){ return Array.prototype.slice.call((root||document).querySelectorAll(sel)); }
+function uid(prefix){
+  var s = Math.random().toString(36).slice(2,8).toUpperCase();
+  var t = Date.now().toString(36).slice(-4).toUpperCase();
+  return (prefix||"SP") + "-" + s + "-" + t;
+}
+function hashStr(str){
+  str = String(str||"");
+  var h = 0;
+  for(var i=0;i<str.length;i++){ h = (h<<5) - h + str.charCodeAt(i); h |= 0; }
+  return Math.abs(h);
+}
+var toastTimer = null;
+function toast(msg){
+  var el = $("#toast");
+  el.textContent = msg;
+  el.classList.add("show");
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(function(){ el.classList.remove("show"); }, 2600);
+}
+
+/* ---------------- storage (with graceful fallback) ---------------- */
+var memoryStore = {};
+var storageOK = true;
+(function testStorage(){
+  try{ localStorage.setItem("__sp_test","1"); localStorage.removeItem("__sp_test"); }
+  catch(e){ storageOK = false; }
+})();
+var store = {
+  get:function(key){
+    try{
+      var raw = storageOK ? localStorage.getItem(key) : memoryStore[key];
+      return raw ? JSON.parse(raw) : null;
+    }catch(e){ return null; }
+  },
+  set:function(key,val){
+    try{
+      var raw = JSON.stringify(val);
+      if(storageOK) localStorage.setItem(key,raw); else memoryStore[key] = raw;
+      return true;
+    }catch(e){ toast("Storage full or unavailable — this session may not persist."); return false; }
+  },
+  remove:function(key){
+    try{ if(storageOK) localStorage.removeItem(key); else delete memoryStore[key]; }catch(e){}
+  },
+  keys:function(prefix){
+    var out = [];
+    try{
+      if(storageOK){
+        for(var i=0;i<localStorage.length;i++){
+          var k = localStorage.key(i);
+          if(k && k.indexOf(prefix)===0) out.push(k);
+        }
+      } else {
+        Object.keys(memoryStore).forEach(function(k){ if(k.indexOf(prefix)===0) out.push(k); });
+      }
+    }catch(e){}
+    return out;
+  }
+};
+if(!storageOK){ toast("On-device storage isn't available in this browser — progress won't be saved."); }
+
+var PROFILE_KEY = "skillproof_profile";
+var PASSPORT_PREFIX = "skillproof_passport_";
+var REQUEST_PREFIX = "skillproof_request_";
+
+/* ---------------- skill knowledge base ---------------- */
+var CATEGORIES = [
+  { key:"electrician", label:"Electrical work", subskills:["Wiring","Switch & socket install","Fault troubleshooting","Panel safety"], keywords:["electric","wiring","wire","switch","socket","circuit","fuse","voltage"] },
+  { key:"plumber", label:"Plumbing", subskills:["Pipe fitting","Leak repair","Fixture install","Drainage"], keywords:["plumb","pipe","leak","tap","drainage","bathroom fitting"] },
+  { key:"carpenter", label:"Carpentry", subskills:["Furniture making","Measuring & cutting","Joinery","Finishing"], keywords:["carpen","wood","furniture","joinery","cabinet"] },
+  { key:"tailor", label:"Tailoring", subskills:["Pattern cutting","Stitching","Alterations","Finishing"], keywords:["tailor","stitch","sew","cloth","garment","fashion"] },
+  { key:"painter", label:"Painting & finishing", subskills:["Surface prep","Wall painting","Texture work","Clean edges"], keywords:["paint","wall finish","texture"] },
+  { key:"mechanic", label:"Vehicle mechanics", subskills:["Engine diagnostics","Brake service","Oil & fluids","Electrical systems"], keywords:["mechanic","engine","vehicle","bike repair","car repair","brake"] },
+  { key:"cook", label:"Culinary skills", subskills:["Knife skills","Recipe execution","Plating","Hygiene"], keywords:["cook","chef","kitchen","recipe","food prep"] },
+  { key:"driver", label:"Professional driving", subskills:["Safe driving","Route planning","Vehicle care","Load handling"], keywords:["driver","driving","delivery","logistics"] },
+  { key:"gardener", label:"Gardening & landscaping", subskills:["Planting","Pruning","Irrigation","Lawn care"], keywords:["garden","landscap","plant","lawn"] },
+  { key:"cleaner", label:"Cleaning & housekeeping", subskills:["Deep cleaning","Sanitation","Organisation","Equipment use"], keywords:["clean","housekeep","sanitation"] }
+];
+var GENERIC = { key:"general", label:"General skilled work", subskills:["Practical execution","Reliability","Safety awareness","Communication"], keywords:[] };
+
+function detectCategory(text){
+  text = (text||"").toLowerCase();
+  var best = null, bestScore = 0;
+  CATEGORIES.forEach(function(cat){
+    var score = 0;
+    cat.keywords.forEach(function(k){ if(text.indexOf(k)!==-1) score++; });
+    if(score > bestScore){ bestScore = score; best = cat; }
+  });
+  return best || GENERIC;
+}
+function detectLevel(text){
+  text = (text||"").toLowerCase();
+  if(/(\d+\s*years?|expert|advanced|professional)/.test(text)) return "Experienced";
+  if(/(some experience|intermediate|few months|learning)/.test(text)) return "Intermediate";
+  return "Beginner";
+}
+function detectLocation(text){
+  var m = (text||"").match(/near\s+([a-zA-Z ]+)/i) || (text||"").match(/in\s+([a-zA-Z ]+)/i);
+  return m ? m[1].trim() : "";
+}
+
+/* ---------------- app / router state ---------------- */
+var state = { profile: null, evidence:null, camStream:null, mediaRecorder:null, recordedChunks:[], recTimerInterval:null, recSeconds:0 };
+
+var NAV_ITEMS = [
+  { hash:"#/", label:"Home", icon:'<path d="M4 11 12 4l8 7"/><path d="M6 10v9h12v-9"/>' , view:"landing"},
+  { hash:"#/understand", label:"Path", icon:'<path d="M4 6h16M4 12h10M4 18h6"/>', view:"understand"},
+  { hash:"#/opportunities", label:"Jobs", icon:'<path d="M4 7h16v12H4z"/><path d="M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2"/>', view:"opportunities"},
+  { hash:"#/passport", label:"Passport", icon:'<rect x="3" y="5" width="18" height="14" rx="2"/><path d="M7 9h10M7 13h6"/>', view:"passport"},
+  { hash:"#/profile", label:"Profile", icon:'<circle cx="12" cy="8" r="3.2"/><path d="M5 20c1.5-4 5-5.5 7-5.5S18.5 16 20 20"/>', view:"profile"}
+];
+
+function renderNav(activeView){
+  var items = NAV_ITEMS.map(function(it){
+    var cls = it.view===activeView ? "active" : "";
+    return '<a href="'+it.hash+'" class="'+cls+'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">'+it.icon+'</svg><span>'+it.label+'</span></a>';
+  }).join("");
+  $("#sidebar").innerHTML = items;
+  $("#bottomnav").innerHTML = items;
+}
+
+function showView(name){
+  $all(".view").forEach(function(v){ v.classList.remove("active"); });
+  var el = $("#view-"+name);
+  if(el) el.classList.add("active");
+  renderNav(name);
+  var badge = $("#roleBadge");
+  if(name.indexOf("employer")===0){ badge.textContent = "EMPLOYER"; }
+  else if(name.indexOf("verify")===0){ badge.textContent = "VERIFY"; }
+  else if(name==="landing" && !state.profile){ badge.textContent = "GUEST"; }
+  else{ badge.textContent = "WORKER"; }
+  window.scrollTo(0,0);
+}
+
+/* ---------------- routing ---------------- */
+function router(){
+  var hash = location.hash || "#/";
+  stopCamera();
+  if(hash === "#/" || hash === ""){ renderLanding(); showView("landing"); return; }
+  if(hash === "#/understand"){
+    if(!state.profile){ toast("Build your skill path first."); location.hash="#/"; return; }
+    renderUnderstand(); showView("understand"); return;
+  }
+  if(hash === "#/mission"){
+    if(!state.profile){ location.hash="#/"; return; }
+    renderMission(); showView("mission"); return;
+  }
+  if(hash === "#/evidence"){
+    if(!state.profile){ location.hash="#/"; return; }
+    resetEvidenceUI(); showView("evidence"); return;
+  }
+  if(hash === "#/evaluation"){
+    if(!state.profile){ location.hash="#/"; return; }
+    showView("evaluation"); runEvaluation(); return;
+  }
+  if(hash === "#/score"){
+    if(!state.profile || !state.profile.score){ location.hash="#/"; return; }
+    renderScore(); showView("score"); return;
+  }
+  if(hash === "#/passport"){
+    var passport = getMyPassport();
+    if(!passport){ toast("No Skill Passport yet — complete a mission first."); location.hash = state.profile ? "#/understand" : "#/"; return; }
+    renderPassport(passport); showView("passport"); return;
+  }
+  if(hash === "#/opportunities"){
+    if(!state.profile){ location.hash="#/"; return; }
+    renderOpportunities(); showView("opportunities"); return;
+  }
+  if(hash === "#/employer"){ showView("employer"); return; }
+  if(hash === "#/employer-results"){
+    var q = store.get("skillproof_last_employer_search");
+    if(!q){ location.hash="#/employer"; return; }
+    renderEmployerResults(q); showView("employer-results"); return;
+  }
+  if(hash === "#/verify"){ showView("verify-prompt"); return; }
+  if(hash.indexOf("#/verify/") === 0){
+    var id = decodeURIComponent(hash.slice("#/verify/".length));
+    renderVerify(id); showView("verify"); return;
+  }
+  if(hash === "#/profile"){ renderProfile(); showView("profile"); return; }
+  location.hash = "#/";
+}
+window.addEventListener("hashchange", router);
+
+/* ---------------- LANDING ---------------- */
+function renderLanding(){
+  var p = state.profile;
+  $("#nameInput").value = p ? p.name : "";
+  $("#skillInput").value = p ? p.skillsRaw : "";
+  $("#goalInput").value = p ? p.goalRaw : "";
+  $("#landingError").innerHTML = "";
+}
+$("#buildPathBtn").addEventListener("click", function(){
+  var name = $("#nameInput").value.trim();
+  var skills = $("#skillInput").value.trim();
+  var goal = $("#goalInput").value.trim();
+  var errBox = $("#landingError");
+  errBox.innerHTML = "";
+  if(!name || !skills){
+    errBox.innerHTML = '<div class="pill-alert err" role="alert">Please enter your name and at least one skill so we can build your path.</div>';
+    return;
+  }
+  var cat = detectCategory(skills);
+  var level = detectLevel(skills);
+  var loc = detectLocation(goal) || detectLocation(skills);
+  var profile = state.profile || {};
+  profile.id = profile.id || uid("USR");
+  profile.name = name;
+  profile.skillsRaw = skills;
+  profile.goalRaw = goal;
+  profile.category = cat.label;
+  profile.categoryKey = cat.key;
+  profile.subskills = cat.subskills;
+  profile.level = level;
+  profile.location = loc;
+  profile.path = ["Understand your skill","Complete a verification mission","Get your Skill Score","Receive your Skill Passport","Match with opportunities"];
+  profile.pathStepIndex = 0;
+  state.profile = profile;
+  store.set(PROFILE_KEY, profile);
+  location.hash = "#/understand";
+});
+[$("#nameInput"), $("#goalInput")].forEach(function(inp){
+  inp.addEventListener("keydown", function(e){ if(e.key === "Enter"){ e.preventDefault(); $("#buildPathBtn").click(); } });
+});
+$("#toEmployerBtn").addEventListener("click", function(){ location.hash = "#/employer"; });
+$("#toVerifyPromptBtn").addEventListener("click", function(){ location.hash = "#/verify"; });
+
+/* ---------------- UNDERSTAND ---------------- */
+function renderUnderstand(){
+  var p = state.profile;
+  $("#uCategory").textContent = p.category;
+  $("#uSubskills").innerHTML = p.subskills.map(function(s){ return '<span class="chip check">✓ '+escapeHTML(s)+'</span>'; }).join("");
+  $("#uLevel").textContent = p.level;
+  $("#uGoal").textContent = p.goalRaw ? p.goalRaw : "No specific goal entered — we'll show general matches.";
+  $("#uLocation").textContent = p.location ? ("📍 " + p.location) : "";
+  var track = $("#pathTrack");
+  track.innerHTML = p.path.map(function(step, i){
+    var cls = i < p.pathStepIndex ? "done" : (i===p.pathStepIndex ? "active" : "");
+    var mark = i < p.pathStepIndex ? "✓" : (i+1);
+    return '<div class="progress-step-wrap"><div class="progress-step '+cls+'"><div class="num">'+mark+'</div><div><div style="font-weight:600; font-size:14px;">'+escapeHTML(step)+'</div></div></div></div>';
+  }).join("");
+}
+$("#startMissionBtn").addEventListener("click", function(){
+  state.profile.pathStepIndex = 1;
+  store.set(PROFILE_KEY, state.profile);
+  location.hash = "#/mission";
+});
+
+/* ---------------- MISSION ---------------- */
+var MISSION_TEMPLATES = {
+  electrician: { title:"Wire a switch safely", objective:"Show how you connect a single-pole switch to a light fixture, including safe isolation.", evidence:"A 20–40 second video demonstrating the wiring steps and a completed, tested switch.", criteria:"Correct wire connections, visible safety awareness, and a working switch at the end." },
+  plumber: { title:"Fix a leaking joint", objective:"Demonstrate diagnosing and sealing a leaking pipe joint.", evidence:"A short video showing the leak, your repair steps, and the sealed result.", criteria:"Correct tool use, clean joint, and a leak-free result." },
+  carpenter: { title:"Make a precise joint cut", objective:"Show measuring, marking and cutting a clean joint in wood.", evidence:"A video of the full cutting process and the finished joint.", criteria:"Accurate measurements, clean cut lines, and a well-fitted joint." },
+  tailor: { title:"Stitch a straight seam", objective:"Demonstrate cutting fabric to a pattern and stitching a clean, even seam.", evidence:"A video of cutting and stitching, ending with the finished seam.", criteria:"Even stitch spacing, straight seam line, and neat finishing." },
+  painter: { title:"Prep and paint a surface", objective:"Show surface preparation and an even coat of paint on a wall section.", evidence:"A video covering prep, application, and the finished surface.", criteria:"Clean edges, even coverage, no visible drips." },
+  mechanic: { title:"Diagnose a basic fault", objective:"Show how you identify and explain a common vehicle fault.", evidence:"A video walking through your diagnostic steps and findings.", criteria:"Logical diagnostic process and a correct explanation." },
+  cook: { title:"Prepare a dish from start to finish", objective:"Show knife skills, cooking technique, and plating for one dish.", evidence:"A video from prep to plated dish.", criteria:"Safe knife handling, proper technique, and clean plating." },
+  driver: { title:"Demonstrate a safe driving routine", objective:"Show a pre-trip vehicle check and safe driving habits.", evidence:"A short video of your vehicle check and a driving clip (dash-cam or narrated).", criteria:"Thorough check and visibly safe driving behaviour." },
+  gardener: { title:"Plant and prune a section", objective:"Show correct planting technique and a basic pruning task.", evidence:"A video covering both tasks.", criteria:"Correct spacing/depth for planting and clean pruning cuts." },
+  cleaner: { title:"Deep-clean a surface area", objective:"Show a structured deep-cleaning routine for one area.", evidence:"A before/after video of the cleaning process.", criteria:"Systematic method and a visibly clean result." },
+  general: { title:"Demonstrate your core skill", objective:"Show a real task from your skill area, start to finish.", evidence:"A 20–40 second video of you performing the task.", criteria:"Clear technique, completion of the task, and safe practice." }
+};
+function renderMission(){
+  var p = state.profile;
+  var m = MISSION_TEMPLATES[p.categoryKey] || MISSION_TEMPLATES.general;
+  p.mission = m;
+  store.set(PROFILE_KEY, p);
+  $("#missionTitle").textContent = m.title;
+  $("#missionObjective").textContent = m.objective;
+  $("#missionEvidence").textContent = m.evidence;
+  $("#missionCriteria").textContent = m.criteria;
+}
+$("#startEvidenceBtn").addEventListener("click", function(){
+  state.profile.pathStepIndex = 2;
+  store.set(PROFILE_KEY, state.profile);
+  location.hash = "#/evidence";
+});
+
+/* ---------------- EVIDENCE (camera / upload) ---------------- */
+function resetEvidenceUI(){
+  $("#evidenceAlerts").innerHTML = "";
+  $("#evidenceFileLabel").textContent = "";
+  $("#recordBtn").disabled = true;
+  $("#recordBtn").textContent = "Start recording";
+  $("#submitEvidenceBtn").disabled = !state.evidence;
+  $("#recTimer").style.display = "none";
+  state.recSeconds = 0;
+  var video = $("#camPreview");
+  if(video){ video.srcObject = null; } /* clear stale frozen frame from a previous camera session */
+  if(state.evidence) $("#evidenceFileLabel").textContent = "Evidence ready: " + escapeHTML(state.evidence.name);
+}
+function stopCamera(){
+  if(state.camStream){
+    state.camStream.getTracks().forEach(function(t){ t.stop(); });
+    state.camStream = null;
+  }
+  if(state.recTimerInterval){ clearInterval(state.recTimerInterval); state.recTimerInterval = null; }
+}
+$("#startCamBtn").addEventListener("click", function(){
+  var alerts = $("#evidenceAlerts");
+  alerts.innerHTML = "";
+  if(!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia){
+    alerts.innerHTML = '<div class="pill-alert warn" role="alert">Camera isn\'t supported in this browser. Please upload a video instead.</div>';
+    return;
+  }
+  navigator.mediaDevices.getUserMedia({ video:true, audio:true }).then(function(stream){
+    state.camStream = stream;
+    var video = $("#camPreview");
+    video.srcObject = stream;
+    $("#recordBtn").disabled = false;
+    toast("Camera enabled");
+  }).catch(function(){
+    alerts.innerHTML = '<div class="pill-alert warn" role="alert">Camera permission was denied or unavailable. You can still upload a video file below.</div>';
+  });
+});
+$("#recordBtn").addEventListener("click", function(){
+  if(!state.camStream) return;
+  if(!state.mediaRecorder || state.mediaRecorder.state === "inactive"){
+    try{
+      state.recordedChunks = [];
+      var mr = new MediaRecorder(state.camStream);
+      state.mediaRecorder = mr;
+      mr.ondataavailable = function(e){ if(e.data && e.data.size>0) state.recordedChunks.push(e.data); };
+      mr.onstop = function(){
+        var blob = new Blob(state.recordedChunks, { type:"video/webm" });
+        state.evidence = { name:"recorded-evidence.webm", size:blob.size, type:"video/webm", source:"camera" };
+        $("#evidenceFileLabel").textContent = "Recorded evidence ready (" + Math.round(blob.size/1024) + " KB)";
+        $("#submitEvidenceBtn").disabled = false;
+      };
+      mr.start();
+      state.recSeconds = 0;
+      $("#recTimer").style.display = "flex";
+      state.recTimerInterval = setInterval(function(){
+        state.recSeconds++;
+        var m = String(Math.floor(state.recSeconds/60)).padStart(2,"0");
+        var s = String(state.recSeconds%60).padStart(2,"0");
+        $("#recTimerText").textContent = m+":"+s;
+        if(state.recSeconds >= 40) $("#recordBtn").click();
+      }, 1000);
+      $("#recordBtn").textContent = "Stop recording";
+    }catch(e){
+      $("#evidenceAlerts").innerHTML = '<div class="pill-alert warn" role="alert">Recording isn\'t supported here. Please upload a video file instead.</div>';
+    }
+  } else {
+    state.mediaRecorder.stop();
+    clearInterval(state.recTimerInterval);
+    $("#recTimer").style.display = "none";
+    $("#recordBtn").textContent = "Start recording";
+  }
+});
+$("#uploadInput").addEventListener("change", function(e){
+  var file = e.target.files && e.target.files[0];
+  var alerts = $("#evidenceAlerts");
+  alerts.innerHTML = "";
+  if(!file) return;
+  if(file.type.indexOf("video") !== 0){
+    alerts.innerHTML = '<div class="pill-alert err" role="alert">That file doesn\'t look like a video. Please choose a video file.</div>';
+    return;
+  }
+  state.evidence = { name:file.name, size:file.size, type:file.type, source:"upload" };
+  $("#evidenceFileLabel").textContent = "Evidence ready: " + escapeHTML(file.name) + " (" + Math.round(file.size/1024) + " KB)";
+  $("#submitEvidenceBtn").disabled = false;
+});
+$("#submitEvidenceBtn").addEventListener("click", function(){
+  if(!state.evidence){
+    $("#evidenceAlerts").innerHTML = '<div class="pill-alert err" role="alert">Please record or upload a video before submitting.</div>';
+    return;
+  }
+  state.profile.evidenceMeta = state.evidence;
+  state.profile.pathStepIndex = 3;
+  store.set(PROFILE_KEY, state.profile);
+  stopCamera();
+  location.hash = "#/evaluation";
+});
+
+/* ---------------- EVALUATION (deterministic, clearly labeled prototype) ---------------- */
+function computeScore(profile){
+  var seed = hashStr(profile.name + profile.skillsRaw + (profile.evidenceMeta?profile.evidenceMeta.name:"") + (profile.evidenceMeta?profile.evidenceMeta.size:0));
+  function part(offset, min, max){
+    var v = (seed >> offset) % 100;
+    return Math.round(min + (v/100)*(max-min));
+  }
+  var technique = part(1, 55, 96);
+  var completeness = part(3, 60, 97);
+  var confidence = part(5, 50, 95);
+  var clarity = part(7, 58, 96);
+  var overall = Math.round((technique+completeness+confidence+clarity)/4);
+  return { overall:overall, breakdown:{ Technique:technique, Completeness:completeness, Confidence:confidence, Clarity:clarity } };
+}
+function runEvaluation(){
+  var rows = $all("#checkAnim .row");
+  rows.forEach(function(r){ r.classList.remove("on"); });
+  var i = 0;
+  var interval = setInterval(function(){
+    if(rows[i]) rows[i].classList.add("on");
+    i++;
+    if(i >= rows.length){
+      clearInterval(interval);
+      setTimeout(function(){
+        var result = computeScore(state.profile);
+        state.profile.score = result.overall;
+        state.profile.breakdown = result.breakdown;
+        state.profile.pathStepIndex = 4;
+        store.set(PROFILE_KEY, state.profile);
+        savePassport(state.profile, result);
+        location.hash = "#/score";
+      }, 500);
+    }
+  }, 550);
+}
+
+/* ---------------- SCORE ---------------- */
+function renderScore(){
+  var p = state.profile;
+  $("#scoreBig").textContent = p.score;
+  var bars = $("#scoreBars");
+  bars.innerHTML = "";
+  Object.keys(p.breakdown).forEach(function(k){
+    var v = p.breakdown[k];
+    var row = document.createElement("div");
+    row.className = "bar-row";
+    row.innerHTML = '<div class="label">'+escapeHTML(k)+'</div><div class="bar-track"><div class="bar-fill" style="width:0%"></div></div><div class="bar-pct">'+v+'%</div>';
+    bars.appendChild(row);
+    setTimeout(function(){ row.querySelector(".bar-fill").style.width = v + "%"; }, 60);
+  });
+  var why = $("#whyList");
+  var notes = [
+    ["Technique", "Based on how closely your evidence matched the mission's completion criteria."],
+    ["Completeness", "Whether your evidence covered the full task from start to finish."],
+    ["Confidence", "Steadiness and clarity of execution shown in the evidence."],
+    ["Clarity", "How clearly the evidence demonstrates the required skill."]
+  ];
+  why.innerHTML = notes.map(function(n){ return '<div class="why-item"><div class="t">'+n[0]+'</div><div class="d">'+n[1]+'</div></div>'; }).join("");
+}
+$("#toPassportBtn").addEventListener("click", function(){ location.hash = "#/passport"; });
+
+/* ---------------- PASSPORT ---------------- */
+function savePassport(profile, result){
+  var passport = {
+    id: profile.passportId || uid("SP"),
+    ownerId: profile.id,
+    name: profile.name,
+    category: profile.category,
+    subskills: profile.subskills,
+    score: result.overall,
+    breakdown: result.breakdown,
+    location: profile.location,
+    createdAt: Date.now()
+  };
+  profile.passportId = passport.id;
+  store.set(PROFILE_KEY, profile);
+  store.set(PASSPORT_PREFIX + passport.id, passport);
+  return passport;
+}
+function getMyPassport(){
+  if(!state.profile || !state.profile.passportId) return null;
+  return store.get(PASSPORT_PREFIX + state.profile.passportId);
+}
+function verifyURL(id){
+  return location.origin + location.pathname + "#/verify/" + encodeURIComponent(id);
+}
+function renderPassport(passport){
+  $("#pName").textContent = passport.name;
+  $("#pCategory").textContent = passport.category;
+  $("#pScore").textContent = passport.score;
+  $("#pBars").innerHTML = Object.keys(passport.breakdown).map(function(k){
+    return '<div class="row"><div class="l">'+escapeHTML(k)+'</div><div class="track"><div class="fill" style="width:'+passport.breakdown[k]+'%"></div></div></div>';
+  }).join("");
+  $("#pSkills").innerHTML = passport.subskills.map(function(s){ return "<span>"+escapeHTML(s)+"</span>"; }).join("");
+  $("#pProofId").textContent = passport.id;
+  var qrbox = $("#qrbox");
+  qrbox.innerHTML = "";
+  var url = verifyURL(passport.id);
+  if(window.QRCode){
+    try{ new QRCode(qrbox, { text:url, width:62, height:62, correctLevel:QRCode.CorrectLevel.M }); }
+    catch(e){ qrbox.innerHTML = '<span style="font-family:var(--mono); font-size:9px; color:#15181C; text-align:center; padding:2px;">'+escapeHTML(passport.id)+'</span>'; }
+  } else {
+    qrbox.innerHTML = '<span style="font-family:var(--mono); font-size:9px; color:#15181C; text-align:center; padding:2px;">'+escapeHTML(passport.id)+'</span>';
+  }
+  $("#passportAlerts").innerHTML = '<p class="footnote">This QR links to a verification page that reads proof data stored in this browser. It works reliably on this device; cross-device lookup needs a backend like Firebase, which this code is structured to plug into later.</p>';
+}
+function roundRectPath(ctx,x,y,w,h,r){
+  ctx.beginPath();
+  ctx.moveTo(x+r,y);
+  ctx.arcTo(x+w,y,x+w,y+h,r);
+  ctx.arcTo(x+w,y+h,x,y+h,r);
+  ctx.arcTo(x,y+h,x,y,r);
+  ctx.arcTo(x,y,x+w,y,r);
+  ctx.closePath();
+}
+function downloadPassportImage(passport){
+  var w = 680, h = 400;
+  var canvas = document.createElement("canvas");
+  canvas.width = w; canvas.height = h;
+  var ctx = canvas.getContext("2d");
+  var grad = ctx.createLinearGradient(0,0,w,h);
+  grad.addColorStop(0, "#12233D");
+  grad.addColorStop(1, "#0A1728");
+  ctx.fillStyle = grad; ctx.fillRect(0,0,w,h);
+  ctx.fillStyle = "rgba(245,166,35,0.16)";
+  ctx.beginPath(); ctx.arc(w-40, 10, 190, 0, Math.PI*2); ctx.fill();
+  ctx.fillStyle = "#ffffff";
+  ctx.font = "600 11px 'IBM Plex Mono', monospace";
+  ctx.fillText("VERIFIED SKILL PASSPORT", 32, 40);
+  ctx.font = "700 30px 'Space Grotesk', sans-serif";
+  ctx.fillText(passport.name, 32, 82);
+  ctx.globalAlpha = 0.82;
+  ctx.font = "400 15px Inter, sans-serif";
+  ctx.fillText(passport.category, 32, 106);
+  ctx.globalAlpha = 1;
+  ctx.font = "700 50px 'Space Grotesk', sans-serif";
+  ctx.fillText(String(passport.score), 32, 172);
+  ctx.globalAlpha = 0.72;
+  ctx.font = "400 14px Inter, sans-serif";
+  ctx.fillText("/ 100 skill score", 108, 172);
+  ctx.globalAlpha = 1;
+  var sx = 32, sy = 206;
+  ctx.font = "600 12px Inter, sans-serif";
+  passport.subskills.forEach(function(s){
+    var tw = ctx.measureText(s).width + 20;
+    if(sx + tw > w - 190){ sx = 32; sy += 28; }
+    ctx.fillStyle = "rgba(255,255,255,0.12)";
+    roundRectPath(ctx, sx, sy-17, tw, 26, 13); ctx.fill();
+    ctx.fillStyle = "#ffffff";
+    ctx.fillText(s, sx+10, sy);
+    sx += tw + 8;
+  });
+  ctx.globalAlpha = 0.75;
+  ctx.font = "500 12px 'IBM Plex Mono', monospace";
+  ctx.fillText("PROOF ID", 32, h-46);
+  ctx.globalAlpha = 1;
+  ctx.font = "600 15px 'IBM Plex Mono', monospace";
+  ctx.fillText(passport.id, 32, h-24);
+  var qrCanvas = document.querySelector("#qrbox canvas");
+  if(qrCanvas){
+    ctx.fillStyle = "#ffffff";
+    ctx.fillRect(w-148, h-148, 112, 112);
+    ctx.drawImage(qrCanvas, w-142, h-142, 100, 100);
+  }
+  var link = document.createElement("a");
+  link.download = "skillpassport-" + passport.id + ".png";
+  link.href = canvas.toDataURL("image/png");
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  toast("Passport image downloaded");
+}
+$("#downloadPassportBtn").addEventListener("click", function(){
+  var passport = getMyPassport();
+  if(!passport){ toast("No passport to download yet."); return; }
+  try{ downloadPassportImage(passport); }
+  catch(e){ toast("Couldn't generate the image on this device — try a screenshot instead."); }
+});
+$("#copyLinkBtn").addEventListener("click", function(){
+  var passport = getMyPassport();
+  if(!passport) return;
+  var url = verifyURL(passport.id);
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(url).then(function(){ toast("Verification link copied"); }).catch(function(){ toast(url); });
+  } else { toast(url); }
+});
+$("#toOpportunitiesBtn").addEventListener("click", function(){ location.hash = "#/opportunities"; });
+
+/* ---------------- OPPORTUNITIES ---------------- */
+var OPPORTUNITY_POOL = {
+  electrician: ["Residential rewiring assistant", "Apartment complex maintenance electrician", "Retail store electrical fit-out"],
+  plumber: ["Housing society plumbing contract", "New-build fixture installation", "Emergency leak repair panel"],
+  carpenter: ["Custom furniture workshop", "Interior fit-out carpentry", "Site joinery crew"],
+  tailor: ["Boutique alterations tailor", "Garment production line", "Custom stitching studio"],
+  painter: ["Apartment repainting project", "Commercial site finishing crew", "Textured wall specialist role"],
+  mechanic: ["Two-wheeler service center", "Fleet maintenance technician", "Roadside assistance mechanic"],
+  cook: ["Restaurant line cook", "Catering event chef", "Cloud kitchen cook"],
+  driver: ["Logistics delivery driver", "Corporate cab driver", "Long-haul route driver"],
+  gardener: ["Residential landscaping crew", "Society garden maintenance", "Nursery planting specialist"],
+  cleaner: ["Office deep-cleaning team", "Post-construction cleanup crew", "Housekeeping service"],
+  general: ["Local skilled-trade opening", "Site support role", "On-demand service provider"]
+};
+function renderOpportunities(){
+  var p = state.profile;
+  var pool = OPPORTUNITY_POOL[p.categoryKey] || OPPORTUNITY_POOL.general;
+  var list = $("#oppList");
+  if(!p.score){
+    list.innerHTML = '<div class="empty">Complete your verification mission to unlock matched opportunities.</div>';
+    return;
+  }
+  var seed = hashStr(p.name + p.categoryKey);
+  list.innerHTML = pool.map(function(title, i){
+    var match = Math.max(55, Math.min(98, (p.score - 5 + ((seed+i*17)%12))));
+    return '<div class="card match-card"><div class="match-score">'+match+'%</div><div><div style="font-weight:700; font-size:14.5px;">'+escapeHTML(title)+'</div><div class="muted" style="font-size:13px; margin-top:2px;">'+escapeHTML(p.location || "Location flexible")+' · Matched to your '+escapeHTML(p.category)+' passport</div></div></div>';
+  }).join("");
+}
+
+/* ---------------- EMPLOYER FLOW ---------------- */
+$("#backToWorkerBtn").addEventListener("click", function(){ location.hash = "#/"; });
+$("#empSearchBtn").addEventListener("click", function(){
+  var need = $("#empSkillInput").value.trim();
+  var loc = $("#empLocationInput").value.trim();
+  var errBox = $("#empError");
+  errBox.innerHTML = "";
+  if(!need){
+    errBox.innerHTML = '<div class="pill-alert err" role="alert">Please describe the skill you need.</div>';
+    return;
+  }
+  var cat = detectCategory(need);
+  var query = { need:need, location:loc, categoryKey:cat.key, categoryLabel:cat.label };
+  store.set("skillproof_last_employer_search", query);
+  location.hash = "#/employer-results";
+});
+function getAllPassports(){
+  return store.keys(PASSPORT_PREFIX).map(function(k){ return store.get(k); }).filter(Boolean);
+}
+function renderEmployerResults(query){
+  $("#empResultsTitle").textContent = "Verified workers for: " + query.categoryLabel;
+  var all = getAllPassports().filter(function(pp){ return pp.category === query.categoryLabel; });
+  var list = $("#empResultsList");
+  if(all.length === 0){
+    list.innerHTML = '<div class="empty">No verified passports for this skill yet in this demo. Ask a worker to complete their Skill Passport first — this section only shows real passports created in this session, not fake sample data.</div>';
+    return;
+  }
+  list.innerHTML = all.map(function(pp){
+    return '<div class="card"><div class="match-card">'
+      + '<div class="match-score">'+pp.score+'</div>'
+      + '<div style="flex:1;"><div style="font-weight:700; font-size:14.5px;">'+escapeHTML(pp.name)+'</div>'
+      + '<div class="muted" style="font-size:13px; margin-top:2px;">'+escapeHTML(pp.category)+(pp.location?(' · '+escapeHTML(pp.location)):'')+'</div>'
+      + '<div class="passport-skills" style="margin-top:8px;">'+pp.subskills.map(function(s){ return '<span style="background:var(--paper-alt); border-color:var(--line); color:var(--ink);">'+escapeHTML(s)+'</span>'; }).join("")+'</div></div></div>'
+      + '<button class="btn btn-amber btn-block" style="margin-top:14px;" data-contact="'+escapeHTML(pp.id)+'">Send contact request</button></div>';
+  }).join("");
+  $all("[data-contact]", list).forEach(function(btn){
+    btn.addEventListener("click", function(){
+      var pid = btn.getAttribute("data-contact");
+      var reqId = uid("REQ");
+      store.set(REQUEST_PREFIX + reqId, { id:reqId, passportId:pid, need:query.need, location:query.location, createdAt:Date.now() });
+      toast("Contact request sent");
+      btn.disabled = true;
+      btn.textContent = "Request sent ✓";
+    });
+  });
+}
+
+/* ---------------- VERIFY (public) ---------------- */
+$("#verifyGoBtn").addEventListener("click", function(){
+  var id = $("#verifyInput").value.trim();
+  if(!id){ toast("Enter a Proof ID"); return; }
+  location.hash = "#/verify/" + encodeURIComponent(id);
+});
+function renderVerify(id){
+  var content = $("#verifyContent");
+  var passport = store.get(PASSPORT_PREFIX + id);
+  if(!passport){
+    content.innerHTML = '<div class="card empty">Proof not found in this browser. QR verification in this prototype only works on the device where the passport was created — connect a backend to verify across devices.</div>';
+    return;
+  }
+  content.innerHTML = '<div class="passport">'
+    + '<div class="passport-top"><div><p class="plabel">Verified Skill Passport</p><h2>'+escapeHTML(passport.name)+'</h2><p class="role">'+escapeHTML(passport.category)+'</p></div><span class="badge verified" style="background:rgba(255,255,255,.14); border-color:rgba(255,255,255,.3); color:#fff;">✓ Verified</span></div>'
+    + '<div class="passport-score"><span class="n">'+passport.score+'</span><span class="d">/ 100 skill score</span></div>'
+    + '<div class="passport-bars">'+Object.keys(passport.breakdown).map(function(k){ return '<div class="row"><div class="l">'+escapeHTML(k)+'</div><div class="track"><div class="fill" style="width:'+passport.breakdown[k]+'%"></div></div></div>'; }).join("")+'</div>'
+    + '<div class="passport-skills">'+passport.subskills.map(function(s){ return "<span>"+escapeHTML(s)+"</span>"; }).join("")+'</div>'
+    + '<div class="passport-foot"><div><p class="plabel">Proof ID</p><p class="proofid">'+escapeHTML(passport.id)+'</p></div></div></div>'
+    + '<p class="footnote">Verified on ' + new Date(passport.createdAt).toLocaleString() + ' via SkillProof (local prototype verification).</p>';
+}
+
+/* ---------------- PROFILE ---------------- */
+function renderProfile(){
+  var p = state.profile;
+  var card = $("#profileCard");
+  if(!p){
+    card.innerHTML = '<div class="empty">No profile yet. <a class="link" href="#/">Build your skill path</a> to get started.</div>';
+    $("#profileRequests").innerHTML = "";
+    return;
+  }
+  card.innerHTML = '<h3 style="font-size:18px;">'+escapeHTML(p.name)+'</h3>'
+    + '<p class="muted" style="margin-top:4px; font-size:13.5px;">'+escapeHTML(p.category)+' · '+escapeHTML(p.level)+'</p>'
+    + (p.score ? ('<p style="margin-top:10px; font-size:14px;">Skill Score: <b>'+p.score+'</b></p>') : '<p class="muted" style="margin-top:10px; font-size:13.5px;">No Skill Score yet.</p>')
+    + '<p class="footnote">This prototype identifies you by name within this browser — there\'s no password login. Connect a real auth provider before using this beyond a demo.</p>';
+  var passport = getMyPassport();
+  var reqBox = $("#profileRequests");
+  if(!passport){ reqBox.innerHTML = '<p class="muted" style="font-size:13.5px;">Requests appear here once you have a Skill Passport.</p>'; return; }
+  var reqs = store.keys(REQUEST_PREFIX).map(function(k){ return store.get(k); }).filter(function(r){ return r && r.passportId === passport.id; });
+  if(reqs.length === 0){ reqBox.innerHTML = '<p class="muted" style="font-size:13.5px;">No contact requests yet.</p>'; return; }
+  reqBox.innerHTML = reqs.map(function(r){
+    return '<div class="why-item"><div class="t">Employer request</div><div class="d">'+escapeHTML(r.need)+(r.location?(' · '+escapeHTML(r.location)):'')+'</div></div>';
+  }).join("");
+}
+
+/* ---------------- RESET ---------------- */
+$("#resetBtn").addEventListener("click", function(){
+  if(!confirm("Reset all SkillProof demo data on this device? This cannot be undone.")) return;
+  var keys = [PROFILE_KEY].concat(store.keys(PASSPORT_PREFIX)).concat(store.keys(REQUEST_PREFIX)).concat(["skillproof_last_employer_search"]);
+  keys.forEach(function(k){ store.remove(k); });
+  state.profile = null;
+  state.evidence = null;
+  toast("Demo data reset");
+  location.hash = "#/";
+  router();
+});
+
+/* ---------------- boot ---------------- */
+function boot(){
+  state.profile = store.get(PROFILE_KEY);
+  router();
+}
+boot();
+
+})();
+</script>
+</body>
+</html>
